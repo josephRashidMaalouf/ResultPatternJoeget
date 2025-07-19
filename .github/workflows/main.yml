@@ -1,0 +1,59 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "/**"  
+  pull_request:
+    branches: 
+      - "master"
+    paths:
+      - "/ResultPatternJoeget**"  
+    tags:
+      - 'v*'  # Match tags like v1.0.0, v2.1.0, etc.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.x'  # Update with your desired .NET version
+
+      - name: Restore dependencies
+        run: dotnet restore ./Nuget/JobSeekerHelper.Nuget
+
+      - name: Get the version from csproj file
+        id: version
+        run: |
+          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" ./ResultPatternJoeget/ResultPatternJoeget.csproj)  # Adjust for your csproj location
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Check if version already exists on NuGet
+        id: version_check
+        run: |
+          PACKAGE_ID="results.joeget"
+          RESPONSE=$(curl -s "https://api.nuget.org/v3-flatcontainer/$PACKAGE_ID/index.json" | jq -r '.versions | index("'$VERSION'")')
+          if [ "$RESPONSE" != "null" ]; then
+            echo "Version $VERSION already exists on NuGet. Skipping push."
+            echo "skip=true" >> $GITHUB_ENV
+          fi
+
+      - name: Build the project
+        if: env.skip != 'true'
+        run: dotnet build ./ResultPatternJoeget --configuration Release
+
+      - name: Pack the NuGet package
+        if: env.skip != 'true'
+        run: dotnet pack ./ResultPatternJoeget --configuration Release --no-build
+
+      - name: Push NuGet package to nuget.org
+        if: env.skip != 'true'
+        run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
