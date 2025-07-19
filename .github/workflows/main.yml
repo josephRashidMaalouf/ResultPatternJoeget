@@ -39,11 +39,19 @@ jobs:
         id: version_check
         run: |
           PACKAGE_ID="results.joeget"
-          RESPONSE=$(curl -s "https://api.nuget.org/v3-flatcontainer/$PACKAGE_ID/index.json" | jq -r '.versions | index("'$VERSION'")')
-          if [ "$RESPONSE" != "null" ]; then
-            echo "Version $VERSION already exists on NuGet. Skipping push."
-            echo "skip=true" >> $GITHUB_ENV
+          PACKAGE_URL="https://api.nuget.org/v3-flatcontainer/$PACKAGE_ID/index.json"
 
+          if curl --silent --fail "$PACKAGE_URL" > package_data.json; then
+            RESPONSE=$(jq -r --arg VERSION "$VERSION" '.versions | index($VERSION)' package_data.json)
+            if [ "$RESPONSE" != "null" ]; then
+              echo "Version $VERSION already exists on NuGet. Skipping push."
+              echo "skip=true" >> $GITHUB_ENV
+            fi
+          else
+            echo "Package $PACKAGE_ID not found on NuGet. Proceeding with push."
+          fi
+          rm -f package_data.json
+          
       - name: Build the project
         if: env.skip != 'true'
         run: dotnet build ./ResultPatternJoeget --configuration Release
