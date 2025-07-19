@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - "/**"  
+      - "/ResultPatternJoeget/**"
   pull_request:
     branches: 
       - "master"
