@@ -4,7 +4,6 @@ public abstract class Result
 {
     public bool Success { get; protected set; }
 }
-
 public abstract class Result<T> : Result
 {
     public T Data { get; protected set; }
