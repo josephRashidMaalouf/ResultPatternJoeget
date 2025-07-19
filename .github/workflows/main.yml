@@ -5,14 +5,13 @@ on:
     branches:
       - master
     paths:
-      - "/ResultPatternJoeget/**"
+      - 'ResultPatternJoeget/**'
+
   pull_request:
     branches: 
-      - "master"
+      - master
     paths:
-      - "/ResultPatternJoeget/**"  
-    tags:
-      - 'v*'  # Match tags like v1.0.0, v2.1.0, etc.
+      - 'ResultPatternJoeget/**'
 
 jobs:
   publish:
@@ -25,15 +24,15 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '9.x'  # Update with your desired .NET version
+          dotnet-version: '9.x'
 
       - name: Restore dependencies
-        run: dotnet restore ./Nuget/JobSeekerHelper.Nuget
+        run: dotnet restore ./ResultPatternJoeget
 
       - name: Get the version from csproj file
         id: version
         run: |
-          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" ./ResultPatternJoeget/ResultPatternJoeget.csproj)  # Adjust for your csproj location
+          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" ./ResultPatternJoeget/ResultPatternJoeget.csproj)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Check if version already exists on NuGet
@@ -44,7 +43,6 @@ jobs:
           if [ "$RESPONSE" != "null" ]; then
             echo "Version $VERSION already exists on NuGet. Skipping push."
             echo "skip=true" >> $GITHUB_ENV
-          fi
 
       - name: Build the project
         if: env.skip != 'true'
@@ -55,5 +53,5 @@ jobs:
         run: dotnet pack ./ResultPatternJoeget --configuration Release --no-build
 
       - name: Push NuGet package to nuget.org
-        if: env.skip != 'true'
+        if: github.event_name == 'push' && env.skip != 'true'
         run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
