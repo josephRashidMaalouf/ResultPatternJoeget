@@ -10,7 +10,7 @@ on:
     branches: 
       - "master"
     paths:
-      - "/ResultPatternJoeget**"  
+      - "/ResultPatternJoeget/**"  
     tags:
       - 'v*'  # Match tags like v1.0.0, v2.1.0, etc.
 
