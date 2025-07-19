@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>$(JoegetResults)</PackageId>
+    <Title>Joeget.Results</Title>
+    <Authors>Joseph Rashid-Maalouf</Authors>
+    <Description>A simple and extendable implementation of the result pattern.</Description>
+  </PropertyGroup>
+
+</Project>
