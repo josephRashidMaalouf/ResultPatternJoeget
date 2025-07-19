@@ -10,7 +10,7 @@ on:
     branches: 
       - "master"
     paths:
-      - "/**"  
+      - "/ResultPatternJoeget**"  
     tags:
       - 'v*'  # Match tags like v1.0.0, v2.1.0, etc.
 
@@ -33,7 +33,7 @@ jobs:
       - name: Get the version from csproj file
         id: version
         run: |
-          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" ./ResultPatternJoeget.csproj)  # Adjust for your csproj location
+          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" ./ResultPatternJoeget/ResultPatternJoeget.csproj)  # Adjust for your csproj location
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Check if version already exists on NuGet
@@ -48,11 +48,11 @@ jobs:
 
       - name: Build the project
         if: env.skip != 'true'
-        run: dotnet build ./ --configuration Release
+        run: dotnet build ./ResultPatternJoeget --configuration Release
 
       - name: Pack the NuGet package
         if: env.skip != 'true'
-        run: dotnet pack ./ --configuration Release --no-build
+        run: dotnet pack ./ResultPatternJoeget --configuration Release --no-build
 
       - name: Push NuGet package to nuget.org
         if: env.skip != 'true'
